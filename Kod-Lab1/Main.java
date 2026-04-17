@@ -14,7 +14,7 @@ public class Main {
         // 1. Ustawienia początkowe
         int liczbaProducentow = 1;
         int liczbaKonsumentow = 2;
-        String folderDoPrzeszukania = "Kod-Lab1/Files";
+        String folderDoPrzeszukania = "Files";
 
         // 2. Tworzymy kolejke blokującą - pojemność wynosi 4
         BlockingQueue<Optional<Path>> kolejka = new LinkedBlockingQueue<>(4);
