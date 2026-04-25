@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.project.controller.ZadanieController">
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <Button onAction="#onActionBtnDodaj" text="Dodaj zadanie"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnPowrot" onAction="#onActionBtnPowrot" text="Powrót"/>
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="tblZadanie">
+            <columns>
+                <TableColumn fx:id="colKolejnosc" text="Kolejność"/>
+                <TableColumn fx:id="colNazwa" text="Nazwa"/>
+                <TableColumn fx:id="colOpis" text="Opis"/>
+                <TableColumn fx:id="colAkcje" text="Akcje"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

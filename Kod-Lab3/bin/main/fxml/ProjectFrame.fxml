@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.project.controller.ProjectController">
+    <top>
+        <VBox alignment="CENTER" spacing="10">
+            <padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+            <HBox spacing="10" alignment="CENTER">
+                <TextField fx:id="txtSzukaj" promptText="Szukaj..."/>
+                <Button onAction="#onActionBtnSzukaj" text="Szukaj"/>
+                <Label text="Rozmiar strony:"/>
+                <ChoiceBox fx:id="cbPageSizes"/>
+                <Button onAction="#onActionBtnDodaj" text="Dodaj"/>
+            </HBox>
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="btnPierwsza" onAction="#onActionBtnPierwsza" text="&lt;&lt;"/>
+                <Button fx:id="btnWstecz" onAction="#onActionBtnWstecz" text="&lt;"/>
+                <Label fx:id="lblPageInfo" text="strona 1"/>
+                <Button fx:id="btnDalej" onAction="#onActionBtnDalej" text="&gt;"/>
+                <Button fx:id="btnOstatnia" onAction="#onActionBtnOstatnia" text="&gt;&gt;"/>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <TableView fx:id="tblProjekt">
+            <columns>
+                <TableColumn fx:id="colId" text="Id"/>
+                <TableColumn fx:id="colNazwa" text="Nazwa"/>
+                <TableColumn fx:id="colOpis" text="Opis"/>
+                <TableColumn fx:id="colDataCzasUtworzenia" text="Data utworzenia"/>
+                <TableColumn fx:id="colDataOddania" text="Data oddania"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>
