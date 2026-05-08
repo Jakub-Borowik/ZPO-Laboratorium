@@ -39,6 +39,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -86,6 +88,9 @@ public class ProjectController {
         pageNo = 0;
         pageSize = 10;
 
+        tblProjekt.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tblProjekt.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+
         cbPageSizes.getItems().addAll(5, 10, 20, 50, 100);
         cbPageSizes.setValue(pageSize);
         cbPageSizes.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -111,6 +116,8 @@ public class ProjectController {
         });
 
         colDataOddania.setCellValueFactory(new PropertyValueFactory<>("dataOddania"));
+
+        enableWrappedCells(colNazwa, colOpis);
 
         TableColumn<Projekt, Void> colEdit = new TableColumn<>("Akcje");
         colEdit.setCellFactory(column -> new TableCell<Projekt, Void>() {
@@ -162,6 +169,32 @@ public class ProjectController {
         tblProjekt.setItems(projekty);
 
         wykonawca.execute(() -> loadPage(search4, pageNo, pageSize));
+    }
+
+    @SafeVarargs
+    private final void enableWrappedCells(TableColumn<Projekt, String>... columns) {
+        for (TableColumn<Projekt, String> column : columns) {
+            column.setCellFactory(col -> new TableCell<Projekt, String>() {
+                private final Text text = new Text();
+                {
+                    text.wrappingWidthProperty().bind(col.widthProperty().subtract(12));
+                    setGraphic(text);
+                    setPrefHeight(Region.USE_COMPUTED_SIZE);
+                }
+
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        text.setText("");
+                        setGraphic(null);
+                    } else {
+                        text.setText(item);
+                        setGraphic(text);
+                    }
+                }
+            });
+        }
     }
 
     private void loadPage(String search4, Integer pageNo, Integer pageSize) {

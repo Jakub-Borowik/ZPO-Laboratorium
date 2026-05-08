@@ -15,6 +15,8 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -39,9 +41,14 @@ public class ZadanieController {
 
     @FXML
     public void initialize() {
+        tblZadanie.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tblZadanie.setFixedCellSize(Region.USE_COMPUTED_SIZE);
+
         colNazwa.setCellValueFactory(new PropertyValueFactory<>("nazwa"));
         colOpis.setCellValueFactory(new PropertyValueFactory<>("opis"));
         colKolejnosc.setCellValueFactory(new PropertyValueFactory<>("kolejnosc"));
+
+        enableWrappedCells(colNazwa, colOpis);
 
         colAkcje.setCellFactory(column -> new TableCell<Zadanie, Void>() {
             private final GridPane pane;
@@ -65,6 +72,32 @@ public class ZadanieController {
         zadania = FXCollections.observableArrayList();
         tblZadanie.setItems(zadania);
         loadZadania();
+    }
+
+    @SafeVarargs
+    private final void enableWrappedCells(TableColumn<Zadanie, String>... columns) {
+        for (TableColumn<Zadanie, String> column : columns) {
+            column.setCellFactory(col -> new TableCell<Zadanie, String>() {
+                private final Text text = new Text();
+                {
+                    text.wrappingWidthProperty().bind(col.widthProperty().subtract(12));
+                    setGraphic(text);
+                    setPrefHeight(Region.USE_COMPUTED_SIZE);
+                }
+
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        text.setText("");
+                        setGraphic(null);
+                    } else {
+                        text.setText(item);
+                        setGraphic(text);
+                    }
+                }
+            });
+        }
     }
 
     private void loadZadania() {
