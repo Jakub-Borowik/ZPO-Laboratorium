@@ -45,7 +45,7 @@ private String nazwisko;
 
 @NotBlank(message = "Pole nr_indeksu nie może być puste.")
 @Column(name = "nr_indeksu", nullable = false, length = 20)
-private Integer numerIndeksu;
+private Integer nrIndeksu;
 
 @NotBlank(message = "Pole email nie może być puste.")
 @Column(nullable = false, length = 50)
