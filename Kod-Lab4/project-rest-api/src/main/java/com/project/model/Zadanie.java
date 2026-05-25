@@ -22,7 +22,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name="zadanie", indexes = { @Index (name = "idx_nazwa_zadania", columnList = "nazwa"),
     @Index (name = "idx_data_dodania", columnList = "dataCzasDodania") })
@@ -50,6 +49,6 @@ private Integer kolejnosc;
 private String opis;
 
 @CreatedDate
-@Column(name = "data_dodania", nullable = false, updatable = false)
+@Column(name = "dataCzasdodania", nullable = false, updatable = false)
 private LocalDateTime dataCzasDodania;
 }

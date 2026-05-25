@@ -4,6 +4,8 @@ import java.net.URI;
 //import java.util.List;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+
 //import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.PageRequest;
@@ -28,6 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  // dzięki adnotacji @RestController klasa jest traktowana jako zarządzany
 @RestController // przez kontener Springa REST-owy kontroler obsługujący sieciowe żądania
 @RequestMapping("/api") // adnotacja @RequestMapping umieszczona w tym miejscu pozwala definiować
+@Slf4j
 // cześć wspólną adresu, wstawianą przed wszystkimi poniższymi ścieżkami
 
 @Tag(name = "Projekt") // zmiana nazwy, uwzględniania m.in. przy generowaniu specyfikacji za pomocą OpenAPI
@@ -44,6 +47,7 @@ public class ProjektRestController {
  //Przykład żądania wywołującego metodę: GET http://localhost:8080/api/projekty/1
  @GetMapping("/projekty/{projektId}")
  ResponseEntity<Projekt> getProjekt(@PathVariable("projektId") Integer projektId){// @PathVariable oznacza,
+    log.info("Pobieranie projektu o ID: {}", projektId);
  return ResponseEntity.of(projektService.getProjekt(projektId)); // że wartość parametru
  } // przekazywana jest w ścieżce
  
@@ -55,18 +59,23 @@ public class ProjektRestController {
  Projekt createdProjekt = projektService.setProjekt(projekt); // przekazywane w ciele żądania
  URI location = ServletUriComponentsBuilder.fromCurrentRequest() //tworzenie linku do utworzonego projektu
  .path("/{projektId}").buildAndExpand(createdProjekt.getProjektId()).toUri();
+ log.info("Tworzenie projektu: {}", projekt);
  return ResponseEntity.created(location).build(); // zwracany jest kod odpowiedzi 201 - Created
- } // z linkiem location w nagłówku
+} // z linkiem location w nagłówku
 
  @PutMapping("/projekty/{projektId}")
  public ResponseEntity<Void> updateProjekt(@Valid @RequestBody Projekt projekt,
 @PathVariable("projektId") Integer projektId) {
+    log.info("Próba aktualizacji projektu o ID: {}", projektId);
  return projektService.getProjekt(projektId)
  .map(p -> {
  projektService.setProjekt(projekt);
+ log.info("Projekt o ID: {} został pomyślnie zaktualizowany.", projektId);
  return new ResponseEntity<Void>(HttpStatus.OK); // 200 (można też zwracać 204 - No content)
  })
- .orElseGet(() -> ResponseEntity.notFound().build()); // 404 - Not found
+ .orElseGet(() -> { log.warn("Nie znaleziono projektu o ID: {} do aktualizacji.", projektId);
+ return ResponseEntity.notFound().build();
+  }); // 404 - Not found
  }
 
  @DeleteMapping("/projekty/{projektId}")
