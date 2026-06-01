@@ -13,9 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import com.project.exception.HttpException;
-import com.project.model.Projekt;
 import com.project.model.Student;
-import com.project.repository.StudentRepository;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -96,28 +94,74 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
+    @SuppressWarnings("null")
     @Override
     public void deleteStudent(Integer studentId) {
-        studentRepository.deleteById(studentId);
+        String resourcePath = getResourcePath(studentId);
+        logger.info("REQUEST -> DELETE {}", resourcePath);
+        restClient
+                .delete()
+                .uri(resourcePath)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (req, res) -> {
+                    throw new HttpException(res.getStatusCode(), res.getHeaders());
+                })
+                .toBodilessEntity();
     }
 
     @Override
     public Page<Student> getStudenci(Pageable pageable) {
-        return studentRepository.findAll(pageable);
+        URI uri = ServiceUtil.getURI(getResourcePath(), pageable);
+        logger.info("REQUEST -> GET {}", uri);
+        return getPage(uri);
     }
 
     @Override
     public Optional<Student> getStudentByNrIndeksu(String nrIndeksu) {
-        return studentRepository.findByNrIndeksu(nrIndeksu);
+        URI uri = ServiceUtil.getUriComponent(getResourcePath())
+                .queryParam("nrIndeksu", nrIndeksu)
+                .build().toUri();
+        logger.info("REQUEST -> GET {}", uri);
+        try {
+            Student student = restClient
+                    .get()
+                    .uri(uri)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        throw new HttpException(res.getStatusCode(), res.getHeaders());
+                    })
+                    .body(Student.class);
+            return Optional.ofNullable(student);
+        } catch (HttpException e) {
+            logger.warn("Nie znaleziono studenta o indeksie: {}", nrIndeksu);
+            return Optional.empty();
+        }
     }
 
     @Override
     public Page<Student> searchByNrIndeksuStartsWith(String nrIndeksu, Pageable pageable) {
-        return studentRepository.findByNrIndeksuStartsWith(nrIndeksu, pageable);
+        URI uri = ServiceUtil.getUriComponent(getResourcePath(), pageable)
+                .queryParam("poczatekIndeksu", nrIndeksu)
+                .build().toUri();
+        logger.info("REQUEST -> GET {}", uri);
+        return getPage(uri);
     }
 
     @Override
     public Page<Student> searchByNazwiskoStartsWith(String nazwisko, Pageable pageable) {
-        return studentRepository.findByNazwiskoStartsWithIgnoreCase(nazwisko, pageable);
+        URI uri = ServiceUtil.getUriComponent(getResourcePath(), pageable)
+                .queryParam("nazwisko", nazwisko)
+                .build().toUri();
+        logger.info("REQUEST -> GET {}", uri);
+        return getPage(uri);
+    }
+
+    @SuppressWarnings("null")
+    private Page<Student> getPage(URI uri) {
+        return restClient.get()
+                .uri(uri.toString())
+                .retrieve()
+                .body(new ParameterizedTypeReference<RestResponsePage<Student>>() {
+                });
     }
 }

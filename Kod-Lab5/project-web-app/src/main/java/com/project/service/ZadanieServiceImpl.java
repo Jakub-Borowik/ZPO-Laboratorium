@@ -15,51 +15,144 @@ import org.springframework.web.client.RestClient;
 import com.project.exception.HttpException;
 import com.project.model.Zadanie;
 
-@Service // Bardzo ważne - to mówi Springowi, że ta klasa to nasz "Kucharz"
+@Service
 public class ZadanieServiceImpl implements ZadanieService {
+    private final static Logger logger = LoggerFactory.getLogger(ZadanieServiceImpl.class);
+    private final RestClient restClient;
 
-    // Wstrzykujemy naszego "Magazyniera" (Repozytorium)
-    private final ZadanieRepository zadanieRepository;
+    // @Autowired
+    public ZadanieServiceImpl(RestClient restClient) {
+        this.restClient = restClient;
+    }
 
-    //@Autowired
-    public ZadanieServiceImpl(ZadanieRepository zadanieRepository) {
-        this.zadanieRepository = zadanieRepository;
+    private String getResourcePath() {
+        return "api/studenci";
+    }
+
+    private String getResourcePath(Integer id) {
+        return String.format("%s/%d", getResourcePath(), id);
     }
 
     @Override
     public Optional<Zadanie> getZadanie(Integer zadanieId) {
-        return zadanieRepository.findById(zadanieId);
+        String resourcePath = getResourcePath(zadanieId);
+        logger.info("REQUEST -> GET {}", resourcePath);
+        @SuppressWarnings("null")
+        Zadanie zadanie = restClient
+                .get()
+                .uri(resourcePath)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (req, res) -> {
+                    throw new HttpException(res.getStatusCode(), res.getHeaders());
+                })
+                .body(Zadanie.class);
+        return Optional.ofNullable(zadanie);
     }
 
     @Override
-    @Transactional
+    @SuppressWarnings("null")
     public Zadanie setZadanie(Zadanie zadanie) {
-        return zadanieRepository.save(zadanie);
+        if (zadanie.getZadanieId() != null) {
+            String resourcePath = getResourcePath(zadanie.getZadanieId());
+            logger.info("REQUEST -> PUT {}", resourcePath);
+            restClient
+                    .put()
+                    .uri(resourcePath)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(zadanie)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        throw new HttpException(res.getStatusCode(), res.getHeaders());
+                    })
+                    .toBodilessEntity();
+            return zadanie;
+        } else {
+            String resourcePath = getResourcePath();
+            logger.info("REQUEST -> POST {}", resourcePath);
+            ResponseEntity<Void> response = restClient
+                    .post()
+                    .uri(resourcePath)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(zadanie)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        throw new HttpException(res.getStatusCode(), res.getHeaders());
+                    })
+                    .toBodilessEntity();
+            URI location = response.getHeaders().getLocation();
+            logger.info("REQUEST (location) -> GET {}", location);
+            return restClient
+                    .get()
+                    .uri(location)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        throw new HttpException(res.getStatusCode(), res.getHeaders());
+                    })
+                    .body(Zadanie.class);
+        }
     }
 
+    @SuppressWarnings("null")
     @Override
-    @Transactional
     public void deleteZadanie(Integer zadanieId) {
-        zadanieRepository.deleteById(zadanieId);
+    String resourcePath = getResourcePath(zadanieId);
+        logger.info("REQUEST -> DELETE {}", resourcePath);
+        restClient
+                .delete()
+                .uri(resourcePath)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (req, res) -> {
+                    throw new HttpException(res.getStatusCode(), res.getHeaders());
+                })
+                .toBodilessEntity();
     }
 
     @Override
     public Page<Zadanie> getZadania(Pageable pageable) {
-        return zadanieRepository.findAll(pageable);
+        URI uri = ServiceUtil.getURI(getResourcePath(), pageable);
+        logger.info("REQUEST -> GET {}", uri);
+        return getPage(uri);
     }
 
     @Override
     public Page<Zadanie> searchByNazwa(String nazwa, Pageable pageable) {
-        return zadanieRepository.findByNazwaContainingIgnoreCase(nazwa, pageable);
+        URI uri = ServiceUtil
+                .getUriComponent(getResourcePath(), pageable)
+                .queryParam("nazwa", nazwa)
+                .build().toUri();
+        logger.info("REQUEST -> GET {}", uri);
+        return getPage(uri);
     }
 
     @Override
     public Page<Zadanie> getZadaniaProjektu(Integer projektId, Pageable pageable) {
-        return zadanieRepository.findZadaniaProjektu(projektId, pageable);
+        URI uri = ServiceUtil.getUriComponent(getResourcePath(), pageable)
+                .queryParam("projektId", projektId)
+                .build().toUri();
+
+        logger.info("REQUEST -> GET {}", uri);
+
+        return getPage(uri);
     }
 
     @Override
     public Page<Zadanie> searchZadaniaWProjekcie(Integer projektId, String nazwa, Pageable pageable) {
-        return zadanieRepository.findByProjekt_ProjektIdAndNazwaContainingIgnoreCase(projektId, nazwa, pageable);
+        URI uri = ServiceUtil.getUriComponent(getResourcePath(), pageable)
+                .queryParam("projektId", projektId)
+                .queryParam("nazwa", nazwa)
+                .build().toUri();
+
+        logger.info("REQUEST -> GET {}", uri);
+
+        return getPage(uri);
+    }
+
+    @SuppressWarnings("null")
+    private Page<Zadanie> getPage(URI uri) {
+        return restClient.get()
+                .uri(uri.toString())
+                .retrieve()
+                .body(new ParameterizedTypeReference<RestResponsePage<Zadanie>>() {
+                });
     }
 }
