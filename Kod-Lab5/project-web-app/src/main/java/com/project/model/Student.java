@@ -34,5 +34,7 @@ private String email;
 private Boolean stacjonarny;
 
 @JsonIgnoreProperties({"studenci"})
+@EqualsAndHashCode.Exclude
+@ToString.Exclude
 private Set<Projekt> projekty;
 }

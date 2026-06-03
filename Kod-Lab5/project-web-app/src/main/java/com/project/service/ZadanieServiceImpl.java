@@ -26,7 +26,7 @@ public class ZadanieServiceImpl implements ZadanieService {
     }
 
     private String getResourcePath() {
-        return "api/studenci";
+        return "api/zadania";
     }
 
     private String getResourcePath(Integer id) {
