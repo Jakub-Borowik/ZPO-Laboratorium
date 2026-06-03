@@ -3,6 +3,7 @@ package com.project.controller;
 import jakarta.validation.Valid;
 
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,14 +14,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpStatusCodeException;
 import com.project.model.Student;
+import com.project.service.ProjektService;
 import com.project.service.StudentService;
 
 @Controller
 public class StudentController {
     private StudentService studentService;
+    private ProjektService projektService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, ProjektService projektService) {
         this.studentService = studentService;
+        this.projektService = projektService;
     }
 
     @GetMapping("/studentList")
@@ -28,7 +32,7 @@ public class StudentController {
         model.addAttribute("studenci", studentService.getStudenci(pageable).getContent());
         return "studentList";
     }
-    
+
     @GetMapping("/studentEdit")
     public String studentEdit(@RequestParam(name = "studentId", required = false) Integer studentId, Model model) {
         if (studentId != null) {
@@ -37,33 +41,37 @@ public class StudentController {
             Student student = new Student();
             model.addAttribute("student", student);
         }
+        model.addAttribute("projekty", projektService.getProjekty(PageRequest.of(0, 100)).getContent());
         return "studentEdit";
     }
 
     @SuppressWarnings("null")
     @PostMapping(path = "/studentEdit")
-    public String studentEditSave(@ModelAttribute @Valid Student student, BindingResult bindingResult) {
+    public String studentEditSave(@ModelAttribute @Valid Student student, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("projekty", projektService.getProjekty(PageRequest.of(0, 100)).getContent());
             return "studentEdit";
         }
         try {
             student = studentService.setStudent(student);
         } catch (HttpStatusCodeException e) {
             bindingResult.rejectValue(Strings.EMPTY, String.valueOf(e.getStatusCode().value()),
-                e.getStatusCode().toString());
-                return "studentEdit";
+                    e.getStatusCode().toString());
+            model.addAttribute("projekty", projektService.getProjekty(PageRequest.of(0, 100)).getContent());
+            return "studentEdit";
         }
         return "redirect:/studentList";
     }
-    
+
     @PostMapping(params = "cancel", path = "/studentEdit")
     public String studentEditCancel() {
         return "redirect:/studentList";
     }
+
     @PostMapping(params = "delete", path = "/studentEdit")
     public String studentEditDelete(@ModelAttribute Student student) {
         studentService.deleteStudent(student.getStudentId());
-            return "redirect:/studentList";
+        return "redirect:/studentList";
     }
-    
+
 }

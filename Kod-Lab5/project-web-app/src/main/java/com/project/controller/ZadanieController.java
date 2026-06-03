@@ -1,8 +1,8 @@
 package com.project.controller;
 
 import jakarta.validation.Valid;
-
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,14 +13,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.HttpStatusCodeException;
 import com.project.model.Zadanie;
+import com.project.service.ProjektService;
 import com.project.service.ZadanieService;
 
 @Controller
 public class ZadanieController {
     private ZadanieService zadanieService;
+    private ProjektService projektService;
 
-    public ZadanieController(ZadanieService zadanieService) {
+    public ZadanieController(ZadanieService zadanieService, ProjektService projektService) {
         this.zadanieService = zadanieService;
+        this.projektService = projektService;
     }
 
     @GetMapping("/zadanieList")
@@ -37,13 +40,16 @@ public class ZadanieController {
             Zadanie zadanie = new Zadanie();
             model.addAttribute("zadanie", zadanie);
         }
+        model.addAttribute("projekty", projektService.getProjekty(PageRequest.of(0, 100)).getContent());
+
         return "zadanieEdit";
     }
 
     @SuppressWarnings("null")
     @PostMapping(path = "/zadanieEdit")
-    public String zadanieEditSave(@ModelAttribute @Valid Zadanie zadanie, BindingResult bindingResult) {
+    public String zadanieEditSave(@ModelAttribute @Valid Zadanie zadanie, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("projekty", projektService.getProjekty(PageRequest.of(0, 100)).getContent());
             return "zadanieEdit";
         }
         try {
@@ -51,6 +57,7 @@ public class ZadanieController {
         } catch (HttpStatusCodeException e) {
             bindingResult.rejectValue(Strings.EMPTY, String.valueOf(e.getStatusCode().value()),
                     e.getStatusCode().toString());
+            model.addAttribute("projekty", projektService.getProjekty(PageRequest.of(0, 100)).getContent());
             return "zadanieEdit";
         }
         return "redirect:/zadanieList";

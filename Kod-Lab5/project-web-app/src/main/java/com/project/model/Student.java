@@ -5,6 +5,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -24,7 +25,7 @@ private String imie;
 @Size(min = 3, max = 100, message = "Nazwisko musi zawierać od {min} do {max} znaków.")
 private String nazwisko;
 
-@NotBlank(message = "Pole nr_indeksu nie może być puste.")
+@NotNull(message = "Pole nr_indeksu nie może być puste.")
 private Integer nrIndeksu;
 
 @NotBlank(message = "Pole email nie może być puste.")
