@@ -34,8 +34,8 @@ public class Zadanie {
 @Column(name="zadanie_id")
 private Integer zadanieId;
 
-@ManyToOne
-@JoinColumn(name ="projekt_id", nullable = false)
+@ManyToOne(optional = true)
+@JoinColumn(name ="projekt_id", nullable = true)
 @JsonIgnoreProperties({"zadania"})
 private Projekt projekt;
 

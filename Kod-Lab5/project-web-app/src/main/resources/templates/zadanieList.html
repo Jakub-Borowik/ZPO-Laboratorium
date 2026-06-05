@@ -18,6 +18,12 @@
         <a th:href="@{/zadanieEdit}">Dodaj zadanie</a>
       </p>
 
+      <form class="search-block" th:action="@{/zadanieList}" method="get">
+        <input type="text" name="q" th:value="${q}" placeholder="Szukaj po nazwie" />
+        <button type="submit">Szukaj</button>
+        <a th:href="@{/zadanieList}">Reset</a>
+      </form>
+
       <table>
         <thead>
           <tr>
@@ -26,6 +32,7 @@
             <th>Opis</th>
             <th>Utworzony</th>
             <th>Projekt</th>
+            <th>Studenci projektu</th>
             <th>Edit</th>
           </tr>
         </thead>
@@ -43,6 +50,17 @@
               Projekt
             </td>
             <td>
+              <span th:if="${zadanie.projekt == null || zadanie.projekt.studenci == null || zadanie.projekt.studenci.isEmpty()}">
+                Brak
+              </span>
+              <div class="cell-list" th:if="${zadanie.projekt != null and zadanie.projekt.studenci != null and !zadanie.projekt.studenci.isEmpty()}">
+                <span class="cell-list-item"
+                  th:each="s : ${zadanie.projekt.studenci}"
+                  th:text="${s.nazwisko + ' ' + s.imie}"
+                  >Student</span>
+              </div>
+            </td>
+            <td>
               <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}"
                 >Edytuj</a
               ><br />
@@ -54,6 +72,14 @@
           </tr>
         </tbody>
       </table>
+
+      <div class="pagination" th:if="${page != null and page.totalPages > 1}">
+        <a th:if="${page.hasPrevious()}"
+           th:href="@{/zadanieList(page=${page.number - 1}, size=${page.size}, q=${q})}">Poprzednia</a>
+        <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+        <a th:if="${page.hasNext()}"
+           th:href="@{/zadanieList(page=${page.number + 1}, size=${page.size}, q=${q})}">Nastepna</a>
+      </div>
     </div>
   </body>
 </html>

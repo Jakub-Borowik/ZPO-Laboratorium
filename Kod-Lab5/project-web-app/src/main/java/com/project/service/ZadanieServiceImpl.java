@@ -26,7 +26,7 @@ public class ZadanieServiceImpl implements ZadanieService {
     }
 
     private String getResourcePath() {
-        return "api/zadania";
+        return "/api/zadania";
     }
 
     private String getResourcePath(Integer id) {
@@ -95,7 +95,7 @@ public class ZadanieServiceImpl implements ZadanieService {
     @SuppressWarnings("null")
     @Override
     public void deleteZadanie(Integer zadanieId) {
-    String resourcePath = getResourcePath(zadanieId);
+        String resourcePath = getResourcePath(zadanieId);
         logger.info("REQUEST -> DELETE {}", resourcePath);
         restClient
                 .delete()

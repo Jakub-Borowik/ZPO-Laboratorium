@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -36,8 +36,23 @@ public class StudentController {
     }
 
     @GetMapping("/studentList")
-    public String studentList(Model model, Pageable pageable) {
-        model.addAttribute("studenci", studentService.getStudenci(pageable).getContent());
+    public String studentList(Model model,
+            @RequestParam(name = "q", required = false) String query,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+        String trimmedQuery = query == null ? "" : query.trim();
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<Student> pageData;
+        if (trimmedQuery.isEmpty()) {
+            pageData = studentService.getStudenci(pageRequest);
+        } else if (trimmedQuery.matches("\\d+")) {
+            pageData = studentService.searchByNrIndeksuStartsWith(trimmedQuery, pageRequest);
+        } else {
+            pageData = studentService.searchByNazwiskoStartsWith(trimmedQuery, pageRequest);
+        }
+        model.addAttribute("studenci", pageData.getContent());
+        model.addAttribute("page", pageData);
+        model.addAttribute("q", trimmedQuery);
         return "studentList";
     }
 
@@ -112,14 +127,9 @@ public class StudentController {
         }
 
         return projektIds.stream()
-                .map(this::buildProjektReference)
+                .map(id -> projektService.getProjekt(id).orElse(null))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-    }
-
-    private Projekt buildProjektReference(Integer projektId) {
-        Projekt projekt = new Projekt();
-        projekt.setProjektId(projektId);
-        return projekt;
     }
 
 }

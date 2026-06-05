@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
@@ -54,7 +56,10 @@ private String email;
 @Column(nullable = false)
 private Boolean stacjonarny;
 
-@ManyToMany(mappedBy = "studenci")
+@ManyToMany
+@JoinTable(name = "projekt_student",
+	joinColumns = { @JoinColumn(name = "student_id") },
+	inverseJoinColumns = { @JoinColumn(name = "projekt_id") })
 @JsonIgnoreProperties({"studenci"})
 private Set<Projekt> projekty;
 }

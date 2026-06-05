@@ -17,7 +17,7 @@ import com.project.model.Student;
 
 @Service
 public class StudentServiceImpl implements StudentService {
-    private static final Logger logger = LoggerFactory.getLogger(ZadanieServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
     private final RestClient restClient;
 
     // @Autowired
@@ -150,7 +150,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public Page<Student> searchByNazwiskoStartsWith(String nazwisko, Pageable pageable) {
         URI uri = ServiceUtil.getUriComponent(getResourcePath(), pageable)
-                .queryParam("nazwisko", nazwisko)
+                .queryParam("poczatekNazwiska", nazwisko)
                 .build().toUri();
         logger.info("REQUEST -> GET {}", uri);
         return getPage(uri);

@@ -17,6 +17,12 @@
         <p>
             <a th:href="@{/studentEdit}">Dodaj studenta</a>
         </p>
+
+        <form class="search-block" th:action="@{/studentList}" method="get">
+            <input type="text" name="q" th:value="${q}" placeholder="Szukaj nazwiska lub nr indeksu" />
+            <button type="submit">Szukaj</button>
+            <a th:href="@{/studentList}">Reset</a>
+        </form>
         
         <table>
             <thead>
@@ -45,6 +51,14 @@
                 </tr>
             </tbody>
         </table>
+
+        <div class="pagination" th:if="${page != null and page.totalPages > 1}">
+            <a th:if="${page.hasPrevious()}"
+               th:href="@{/studentList(page=${page.number - 1}, size=${page.size}, q=${q})}">Poprzednia</a>
+            <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+            <a th:if="${page.hasNext()}"
+               th:href="@{/studentList(page=${page.number + 1}, size=${page.size}, q=${q})}">Nastepna</a>
+        </div>
     </div>
 </body>
 </html>

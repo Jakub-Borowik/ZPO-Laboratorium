@@ -17,6 +17,12 @@
         <p>
             <a th:href="@{/projektEdit}">Dodaj projekt</a>
         </p>
+
+        <form class="search-block" th:action="@{/projektList}" method="get">
+            <input type="text" name="q" th:value="${q}" placeholder="Szukaj po nazwie" />
+            <button type="submit">Szukaj</button>
+            <a th:href="@{/projektList}">Reset</a>
+        </form>
         
         <table>
             <thead>
@@ -26,6 +32,8 @@
                     <th>Opis</th>
                     <th>Utworzony</th>
                     <th>Data oddania</th>
+                    <th>Zadania</th>
+                    <th>Studenci</th>
                     <th>Edit</th>
                 </tr>
             </thead>
@@ -37,12 +45,32 @@
                     <td th:text="${#temporals.format(projekt.dataCzasUtworzenia, 'yyyy-MM-dd HH:mm:ss')}">Utworzony</td>
                     <td th:text="${#temporals.format(projekt.dataOddania, 'yyyy-MM-dd')}">Data oddania</td>
                     <td>
+                        <span th:if="${projekt.zadania == null || projekt.zadania.isEmpty()}">Brak</span>
+                        <div class="cell-list" th:if="${projekt.zadania != null and !projekt.zadania.isEmpty()}">
+                            <span class="cell-list-item" th:each="z : ${projekt.zadania}" th:text="${z.nazwa}">Zadanie</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span th:if="${projekt.studenci == null || projekt.studenci.isEmpty()}">Brak</span>
+                        <div class="cell-list" th:if="${projekt.studenci != null and !projekt.studenci.isEmpty()}">
+                            <span class="cell-list-item" th:each="s : ${projekt.studenci}" th:text="${s.nazwisko + ' ' + s.imie}">Student</span>
+                        </div>
+                    </td>
+                    <td>
                         <a th:href="@{/projektEdit(projektId=${projekt.projektId})}">Edytuj</a><br>
                         <a th:href="@{/projektEdit(projektId=${projekt.projektId}, delete='true')}">Usuń</a>
                     </td>
                 </tr>
             </tbody>
         </table>
+
+        <div class="pagination" th:if="${page != null and page.totalPages > 1}">
+            <a th:if="${page.hasPrevious()}"
+               th:href="@{/projektList(page=${page.number - 1}, size=${page.size}, q=${q})}">Poprzednia</a>
+            <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+            <a th:if="${page.hasNext()}"
+               th:href="@{/projektList(page=${page.number + 1}, size=${page.size}, q=${q})}">Nastepna</a>
+        </div>
     </div>
 </body>
 </html>

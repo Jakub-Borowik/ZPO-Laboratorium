@@ -40,7 +40,7 @@ public class Projekt {
     @ToString.Exclude
     private List<Zadanie> zadania;
 
-    @JsonIgnore
+    @JsonIgnoreProperties({"projekty"})
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<Student> studenci;
