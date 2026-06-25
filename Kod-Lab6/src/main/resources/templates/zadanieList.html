@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <link th:href="@{/css/list-style.css}" rel="stylesheet" />
+    <title>Lista Zadań</title>
+  </head>
+  <body>
+    <div class="root">
+      <h1>Lista Zadań</h1>
+
+      <p>
+        <a th:href="@{/studentList}">Lista Studentów</a> |
+        <a th:href="@{/projektList}">Lista Projektów</a>
+      </p>
+
+      <p>
+        <a th:href="@{/zadanieEdit}">Dodaj zadanie</a>
+      </p>
+
+      <form class="search-block" th:action="@{/zadanieList}" method="get">
+        <input type="text" name="q" th:value="${q}" placeholder="Szukaj po nazwie" />
+        <button type="submit">Szukaj</button>
+        <a th:href="@{/zadanieList}">Reset</a>
+      </form>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Nazwa</th>
+            <th>Opis</th>
+            <th>Utworzony</th>
+            <th>Projekt</th>
+            <th>Studenci projektu</th>
+            <th>Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="zadanie : ${zadania}">
+            <td th:text="${zadanie.zadanieId}">Id</td>
+            <td th:text="${zadanie.nazwa}">Nazwa</td>
+            <td th:text="${zadanie.opis}">Opis</td>
+            <td
+              th:text="${#temporals.format(zadanie.dataCzasDodania, 'yyyy-MM-dd HH:mm:ss')}"
+            >
+              Utworzony
+            </td>
+            <td th:text="${zadanie.projekt?.nazwa} ?: 'Brak projektu'">
+              Projekt
+            </td>
+            <td>
+              <span th:if="${zadanie.projekt == null || zadanie.projekt.studenci == null || zadanie.projekt.studenci.isEmpty()}">
+                Brak
+              </span>
+              <div class="cell-list" th:if="${zadanie.projekt != null and zadanie.projekt.studenci != null and !zadanie.projekt.studenci.isEmpty()}">
+                <span class="cell-list-item"
+                  th:each="s : ${zadanie.projekt.studenci}"
+                  th:text="${s.nazwisko + ' ' + s.imie}"
+                  >Student</span>
+              </div>
+            </td>
+            <td>
+              <a th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId})}"
+                >Edytuj</a
+              ><br />
+              <a
+                th:href="@{/zadanieEdit(zadanieId=${zadanie.zadanieId}, delete='true')}"
+                >Usuń</a
+              >
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="pagination" th:if="${page != null and page.totalPages > 1}">
+        <a th:if="${page.hasPrevious()}"
+           th:href="@{/zadanieList(page=${page.number - 1}, size=${page.size}, q=${q})}">Poprzednia</a>
+        <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}">1 / 1</span>
+        <a th:if="${page.hasNext()}"
+           th:href="@{/zadanieList(page=${page.number + 1}, size=${page.size}, q=${q})}">Nastepna</a>
+      </div>
+    </div>
+  </body>
+</html>
